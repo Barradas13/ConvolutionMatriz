@@ -32,7 +32,6 @@ public class FiltrandoImg {
         return result;
     }
 
-
     public static void imprimeMatriz(int[][][] matriz){
         for(int i = 0; i < matriz.length; i ++){
             for(int j = 0; j < matriz[0].length; j ++){
@@ -41,6 +40,8 @@ public class FiltrandoImg {
         }
     }
 
+
+    //pega todos os valores ao redor de uma posição x, y e retorna-os em uma matriz
     public static int[][][] pegaRedores(int[][][] matrix, int[] posicao) {
         int[][][] res = new int[3][3][3];
 
@@ -69,27 +70,26 @@ public class FiltrandoImg {
 
     
     public static void salvarImagem(int[][][] result, String nomeArquivo) throws IOException {
-        int altura = result.length;
-        int largura = result[0].length;
+        //Imagem que sera escrita em forma de output para o caminho atual
+        BufferedImage image = new BufferedImage(result[0].length, result.length, BufferedImage.TYPE_INT_RGB);
 
-        BufferedImage image = new BufferedImage(largura, altura, BufferedImage.TYPE_INT_RGB);
-
-        for (int linha = 0; linha < altura; linha++) {
-            for (int coluna = 0; coluna < largura; coluna++) {
-                try {
-                    Color cor = new Color(result[linha][coluna][0], result[linha][coluna][1], result[linha][coluna][2]);
-                    image.setRGB(coluna, linha, cor.getRGB());
-                } catch (java.lang.IllegalArgumentException e) {
-
-                }
-               
-                
+        //passa por cada pixel setando uma cor, passando pra image que vai transformar em pixel colorido e armazendando
+        for (int i = 0; i < result.length; i++) {
+            for (int j = 0; j < result[0].length; j++) {
+                Color cor = new Color(result[i][j][0], result[i][j][1], result[i][j][2]);
+                image.setRGB(j, i, cor.getRGB());
             }
         }
 
+        //cria o arquivo
         File output = new File(nomeArquivo);
+
+        //escreve a imagem dentro do arquivo recem criado
         ImageIO.write(image, "jpg", output);
     }
+
+    //vai sobrepor um kernel (matriz de convolução) sobre uma matriz de imagem que temos
+    //mudando os valores e retornando uma nova matriz de imagem 
 
     public static int[][][] filtering(int[][] kernel, int[][][] matriz){
         int[][][] resultado = new int[matriz.length - 2][matriz[0].length - 2][3];
@@ -144,7 +144,10 @@ public class FiltrandoImg {
         try {
             int[][][] matrix = lerImagem("Img1.png"); 
 
-            int[][] kernelBorbas = {{-1,-1,-1}, {-1, 8, -1}, {-1,-1,-1}};
+            //kernel de borda
+            int[][] kernelBorbas =  {{-1,-1,-1}, 
+                                    {-1, 8, -1}, 
+                                    {-1,-1,-1}};
 
             int[][][] bordas = filtering(kernelBorbas, matrix);
 
@@ -152,13 +155,19 @@ public class FiltrandoImg {
 
             matrix = lerImagem("Img2.png");
 
-            int[][] kernelDesfoque = {{1,1,1}, {1, 1, 1}, {1,1,1}};
+            //kernel de desfoque
+            int[][] kernelDesfoque= {{1,1,1}, 
+                                    {1, 1, 1}, 
+                                    {1,1,1}};
 
             int[][][] desfoque = filtering(kernelDesfoque, matrix);
 
             salvarImagem(desfoque, "desfoque.jpg");
 
-            int[][] kernelShader = {{0,-1,0}, {-1, 5, -1}, {0,-1,0}};
+            //kernel de shader
+            int[][] kernelShader =  {{0,-1,0}, 
+                                    {-1, 5, -1}, 
+                                    {0,-1,0}};
 
             int[][][] shader = filtering(kernelShader, matrix);
 
